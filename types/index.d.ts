@@ -31,19 +31,28 @@ export type TEditorHandlerConfig = (
 	column?: IColumn
 ) => TEditorType | IColumnEditorConfig | null;
 
+export type IInnerApi = Pick<
+	IApi,
+	"exec" | "getState" | "getReactiveState" | "getRow"
+>;
+
 export interface ICellProps {
-	api: IApi;
+	api: IInnerApi;
 	row: IRow;
 	column: IColumn;
 	onaction: (ev: { action?: any; data?: { [key: string]: any } }) => void;
 }
 
+export interface IHeaderCellProps {
+	api: IInnerApi;
+	row: number;
+	column: IColumn;
+	cell: Omit<IHeaderCell, "cell">;
+	onaction: (ev: { action?: any; data?: { [key: string]: any } }) => void;
+}
+
 export interface IHeaderCellConfig extends IHeaderCell {
-	cell?: DefineComponent<
-		ICellProps & {
-			cell: Omit<IHeaderCell, "cell">;
-		}
-	>;
+	cell?: DefineComponent<IHeaderCellProps>;
 }
 
 export type TColumnHeaderConfig =
@@ -117,8 +126,17 @@ export declare const Toolbar: DefineComponent<{
 }>;
 
 export declare const Tooltip: DefineComponent<{
-	content?: DefineComponent;
+	content?: DefineComponent<{
+		data: {
+			row: IRow;
+			column: IColumn;
+		};
+	}>;
 	api?: IApi;
+	at?: string;
+	overflow?: boolean;
+	resolver?: (element: HTMLElement) => any;
+	[key: string]: any;
 }>;
 
 export declare const Material: DefineComponent<{

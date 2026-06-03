@@ -42,8 +42,9 @@ const api1 = ref(null);
 <template>
 	<div style="padding: 20px">
 		<h4>Default text tooltips for specific columns</h4>
+		<p>The tooltip is only shown for cells with overflow</p>
 		<div>
-			<Tooltip :api="api">
+			<Tooltip overflow :api="api">
 				<Grid :data="data" :columns="columnsTooltip" ref="api" />
 			</Tooltip>
 		</div>

@@ -9,7 +9,7 @@ const countriesCount = computed(() => props.data.length);
 </script>
 
 <template>
-	<div v-if="Array.isArray(data)">
+	<div v-if="Array.isArray(data)" class="list">
 		<span>
 			<template v-if="countriesCount && countriesCount <= 3">
 				{{ data.map(item => item.label).join(", ") }}
@@ -38,6 +38,11 @@ const countriesCount = computed(() => props.data.length);
 </template>
 
 <style scoped>
+.list {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
 .empty {
 	color: var(--wx-color-font-disabled);
 }

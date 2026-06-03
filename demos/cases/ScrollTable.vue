@@ -11,6 +11,9 @@ const api = ref(null);
 function doScroll(row, column) {
 	api.value.exec("scroll", { row, column });
 }
+function doScrollTo(top, left) {
+	api.value.exec("scroll-to", { top, left });
+}
 </script>
 
 <template>
@@ -40,6 +43,24 @@ function doScroll(row, column) {
 				:onclick="() => doScroll(data[0].id, columns[1].id)"
 			>
 				Scroll to the first row and column
+			</Button>
+		</div>
+		<div
+			style="
+				padding-bottom: 20px;
+				display: flex;
+				flex-direction: columns;
+				gap: 20px;
+			"
+		>
+			<Button type="primary" :onclick="() => doScrollTo(5000, 0)">
+				Scroll to top: 5000
+			</Button>
+			<Button type="primary" :onclick="() => doScrollTo(0, 2000)">
+				Scroll to left: 2000
+			</Button>
+			<Button type="primary" :onclick="() => doScrollTo(0, 0)">
+				Scroll to top-left corner
 			</Button>
 		</div>
 		<div style="width: 1000px; height: 600px">

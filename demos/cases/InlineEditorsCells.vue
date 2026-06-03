@@ -64,31 +64,9 @@ const columns = [
 			},
 		},
 		options: countries,
-		width: 130,
+		width: 230,
 		cell: DestinationCell,
 	},
-	/*{
-		id: "destinations-template",
-		header: 'Destinations - "multiselect" with template',
-		editor: {
-			type: "multiselect",
-			config: {
-				template: value => {
-					if (Array.isArray(value)) {
-						return value.map(v => `${v.flag}`).join(" ");
-					}
-					return `${value.label} ${value.flag}`;
-				},
-			},
-		},
-		options: countries,
-		width: 300,
-		template: value => {
-			return value
-				.map(v => countries.find(c => c.id === v)?.flag)
-				.join(" ");
-		},
-	},*/
 	{
 		id: "color",
 		header: 'Color - custom "color"',
@@ -97,10 +75,6 @@ const columns = [
 		cell: ColorCell,
 	},
 ];
-
-data.forEach(row => {
-	row["destinations-template"] = [...row.destinations];
-});
 </script>
 
 <template>

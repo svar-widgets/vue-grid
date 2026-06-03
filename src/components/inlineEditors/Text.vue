@@ -1,7 +1,7 @@
 <script setup>
 defineOptions({ name: "GridInlineEditorsText" });
 
-import { ref, onMounted } from "vue";
+import { ref, computed, onMounted } from "vue";
 import { clickOutside } from "@svar-ui/lib-dom";
 import { asDirective } from "@svar-ui/lib-vue";
 
@@ -14,6 +14,7 @@ const props = defineProps({
 });
 
 const value = ref(props.editor.value || "");
+const type = computed(() => props.editor?.config?.type ?? "text");
 const node = ref(null);
 
 onMounted(() => node.value.focus());
@@ -35,7 +36,7 @@ function closeAndSave({ key }) {
 		@input="updateValue"
 		@keydown="closeAndSave"
 		ref="node"
-		type="text"
+		:type="type"
 		:value="value"
 	/>
 </template>

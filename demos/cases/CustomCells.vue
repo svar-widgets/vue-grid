@@ -4,7 +4,7 @@ import { Grid } from "../../src";
 import { getData } from "../data";
 
 import CheckboxCell from "../custom/CheckboxCell.vue";
-import AvatarCell from "../custom/AvatarCell.vue";
+import UserCell from "../custom/UserCell.vue";
 import HeaderTextCell from "../custom/HeaderTextCell.vue";
 import FooterTextCell from "../custom/FooterTextCell.vue";
 
@@ -29,7 +29,7 @@ const columns = [
 		cell: CheckboxCell,
 		width: 36,
 	},
-	{ id: "avatar", cell: AvatarCell, width: 350 },
+	{ id: "avatar", cell: UserCell, width: 350 },
 ];
 
 function action(action, ev) {

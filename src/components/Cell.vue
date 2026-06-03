@@ -1,7 +1,7 @@
 <script setup>
 defineOptions({ name: "GridCell" });
 
-import { computed, ref, watch, onUnmounted, inject } from "vue";
+import { computed, ref, watch, inject } from "vue";
 import { subscribe } from "@svar-ui/lib-vue";
 import { getStyle } from "../helpers/columnWidth";
 import { getRenderValue } from "@svar-ui/grid-store";
@@ -80,15 +80,6 @@ function toggleFocusAction() {
 		});
 	}
 }
-
-let focusableLocal = props.focusable;
-
-onUnmounted(() => {
-	if (focusableLocal && focusCellVal.value) {
-		api.exec("focus-cell", { eventSource: "destroy" });
-		focusableLocal = false;
-	}
-});
 
 function highlightText(text) {
 	const regex = new RegExp(`(${searchVal.value.value.trim()})`, "gi");

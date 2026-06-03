@@ -1,7 +1,7 @@
 <script setup>
 defineOptions({ name: "GridLayout" });
 
-import { ref, computed, watchEffect, onMounted, inject, nextTick } from "vue";
+import { ref, computed, watchEffect, watch, onMounted, onUnmounted, inject, nextTick } from "vue";
 import { subscribe } from "@svar-ui/lib-vue";
 import { asDirective } from "@svar-ui/lib-vue";
 import { onresize } from "../helpers/actions/onresize";
@@ -64,6 +64,8 @@ const {
 	select,
 	editor,
 	scroll,
+	scrollLeft,
+	scrollTop,
 	tree,
 	focusCell,
 	_print,
@@ -80,6 +82,8 @@ const _sizesVal = subscribe(_sizes);
 const selectedRowsVal = subscribe(selectedRows);
 const selectVal = subscribe(select);
 const editorVal = subscribe(editor);
+const scrollLeftVal = subscribe(scrollLeft);
+const scrollTopVal = subscribe(scrollTop);
 const treeVal = subscribe(tree);
 const focusCellVal = subscribe(focusCell);
 const _printVal = subscribe(_print);
@@ -91,8 +95,20 @@ const _rowHeightFromDataVal = subscribe(_rowHeightFromData);
 const SCROLLSIZE = ref(0);
 onMounted(() => (SCROLLSIZE.value = getScrollSize()));
 
-const scrollLeft = ref(0);
-const scrollTop = ref(0);
+const bodyClientHeight = ref(0);
+const bodyEl = ref(null);
+let bodyResizeObserver;
+
+onMounted(() => {
+	bodyResizeObserver = new ResizeObserver(entries => {
+		bodyClientHeight.value = entries[0].target.clientHeight;
+	});
+	if (bodyEl.value) bodyResizeObserver.observe(bodyEl.value);
+});
+
+onUnmounted(() => {
+	bodyResizeObserver?.disconnect();
+});
 
 const hasAny = computed(() => {
 	return _columnsVal.value.some(col => !col.hidden && col.flexgrow);
@@ -194,8 +210,8 @@ const renderColumns = computed(() => {
 	let dataC, headerC, footerC;
 
 	// get visible columns
-	const left = scrollLeft.value;
-	const right = scrollLeft.value + props.clientWidth;
+	const left = scrollLeftVal.value;
+	const right = scrollLeftVal.value + props.clientWidth;
 
 	let start = 0;
 	let end = 0;
@@ -272,23 +288,33 @@ const renderColumns = computed(() => {
 	return { data: dataC, header: headerC, footer: footerC, d, df, dh };
 });
 
+const headerHeight = computed(() => props.header ? _sizesVal.value.headerHeight : 0);
+const footerHeight = computed(() => props.footer ? _sizesVal.value.footerHeight : 0);
+
+const hasHScroll = computed(() =>
+	props.clientWidth && props.clientHeight ? fullWidth.value >= props.clientWidth : false
+);
+const hasVScroll = ref(false);
+
+function setVScroll() {
+	hasVScroll.value =
+		props.clientWidth && props.clientHeight
+			? fullHeight.value + headerHeight.value + footerHeight.value >=
+				props.clientHeight - (fullWidth.value >= props.clientWidth ? SCROLLSIZE.value : 0)
+			: false;
+}
+
+watch(bodyClientHeight, () => {
+	requestAnimationFrame(setVScroll);
+});
+watch(() => props.clientHeight, () => {
+	setVScroll();
+});
+
 const contentWidth = computed(() =>
 	hasAny.value && fullWidth.value <= props.clientWidth
 		? props.clientWidth - (hasVScroll.value ? SCROLLSIZE.value : 0)
 		: fullWidth.value
-);
-
-const headerHeight = computed(() => props.header ? _sizesVal.value.headerHeight : 0);
-const footerHeight = computed(() => props.footer ? _sizesVal.value.footerHeight : 0);
-
-const hasVScroll = computed(() =>
-	props.clientWidth && props.clientHeight
-		? fullHeight.value + headerHeight.value + footerHeight.value >=
-				props.clientHeight - (fullWidth.value >= props.clientWidth ? SCROLLSIZE.value : 0)
-		: false
-);
-const hasHScroll = computed(() =>
-	props.clientWidth && props.clientHeight ? fullWidth.value >= props.clientWidth : false
 );
 
 // set global width
@@ -318,14 +344,14 @@ const renderRows = computed(() => {
 	let start = 0,
 		deltaTop = 0;
 	if (props.autoRowHeight) {
-		let st = scrollTop.value;
+		let st = scrollTopVal.value;
 		while (st > 0) {
 			st -= rowHeights[start] || defaultRowHeight.value;
 			start++;
 		}
 
 		// space to first rendered row
-		deltaTop = scrollTop.value - st;
+		deltaTop = scrollTopVal.value - st;
 		for (let i = Math.max(0, start - EXTRAROWS - 1); i < start; i++)
 			deltaTop -= rowHeights[start - i] || defaultRowHeight.value;
 
@@ -336,7 +362,7 @@ const renderRows = computed(() => {
 			let topHeight = 0;
 			for (let i = 0; i < dataVal.value.length; i++) {
 				const height = dataVal.value[i].rowHeight || defaultRowHeight.value;
-				if (topHeight + height > scrollTop.value) {
+				if (topHeight + height > scrollTopVal.value) {
 					startInd = i;
 					break;
 				}
@@ -367,7 +393,7 @@ const renderRows = computed(() => {
 			return { d: deltaTop, start, end };
 		}
 
-		start = Math.floor(scrollTop.value / defaultRowHeight.value);
+		start = Math.floor(scrollTopVal.value / defaultRowHeight.value);
 		start = Math.max(0, start - EXTRAROWS);
 		deltaTop = start * defaultRowHeight.value;
 	}
@@ -409,8 +435,10 @@ const renderStart = computed(() => renderRows.value.start);
 const renderEnd = ref();
 
 function onScroll(ev) {
-	scrollTop.value = ev.target.scrollTop;
-	scrollLeft.value = ev.target.scrollLeft;
+	const top = ev.target.scrollTop;
+	const left = ev.target.scrollLeft;
+	if (top !== scrollTopVal.value || left !== scrollLeftVal.value)
+		api.exec("scroll-to", { top, left });
 }
 
 function lockSelection(ev) {
@@ -496,7 +524,7 @@ function startDrag(ev, context) {
 		.forEach(element => element.setAttribute("tabindex", "-1"));
 	container.appendChild(dragNode.value);
 
-	const offsetX = scrollLeft.value - renderColumns.value.d;
+	const offsetX = scrollLeftVal.value - renderColumns.value.d;
 	const vScrollSize = hasVScroll.value ? SCROLLSIZE.value : 0;
 
 	container.style.width =
@@ -548,7 +576,7 @@ function moveDrag(ev, context) {
 				? dragNode.value?.offsetHeight
 				: _sizesVal.value.rowHeight;
 
-			if (scrollTop.value === 0 || pos.y > min + rowHeight - 1) {
+			if (scrollTopVal.value === 0 || pos.y > min + rowHeight - 1) {
 				const targetRect = targetRow.getBoundingClientRect();
 				const dragNodeOffset = getOffset(dragNode.value);
 
@@ -557,8 +585,10 @@ function moveDrag(ev, context) {
 
 				const dir = dragNodePos > targetNodePos ? -1 : 1;
 				const initialMode = dir === 1 ? "after" : "before";
+				const flat = api.getState().flatData;
 				const diff = Math.abs(
-					api.getRowIndex(from) - api.getRowIndex(to)
+					flat.findIndex(r => r.id === from) -
+						flat.findIndex(r => r.id === to)
 				);
 
 				const mode =
@@ -674,6 +704,22 @@ function adjustHeight() {
 
 watchEffect(() => dataRows.value && props.autoRowHeight && adjustHeight());
 
+watchEffect(() => {
+	if (focusCellVal.value) {
+		const rowExists = dataRows.value.some(
+			row => row.id === focusCellVal.value.row
+		);
+		const cellExists =
+			rowExists &&
+			renderColumns.value.data.some(
+				col => col.id === focusCellVal.value.column && !col.collapsed
+			);
+		if (!cellExists) {
+			api.exec("focus-cell", { eventSource: "destroy" });
+		}
+	}
+});
+
 /* focus is a focusable cell which either belongs to visible selection
    or is the first visible cell in grid, which maybe scrolled up due to EXTRAROWS
    If select is false, focusCell can be outside selection*/
@@ -708,6 +754,8 @@ watchEffect(() => {
 
 const scrollToConfig = computed(() => ({
 	scroll,
+	scrollLeft,
+	scrollTop,
 	getWidth: () => props.clientWidth - (hasVScroll.value ? SCROLLSIZE.value : 0),
 	getHeight: () => visibleRowsHeight.value,
 	getScrollMargin: () => leftColumns.value.width + rightColumns.value.width,
@@ -791,6 +839,7 @@ function isSelected(row) {
 					/>
 				</div>
 				<div
+					ref="bodyEl"
 					class="wx-body"
 					:style="`width:${contentWidth}px;height:${fullHeight}px;`"
 					:onmousedown="(ev) => lockSelection(ev)"

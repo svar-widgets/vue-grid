@@ -60,6 +60,7 @@ To use SVAR Vue DataGrid, simply import the package and include the component in
 ```vue
 <script setup>
 import { Grid } from "@svar-ui/vue-grid";
+import "@svar-ui/vue-grid/all.css";
 
 const data = [
 	{

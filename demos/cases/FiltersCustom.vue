@@ -2,8 +2,9 @@
 import { getData } from "../data";
 import { Grid } from "../../src";
 import StatusCell from "../custom/StatusCell.vue";
+import AvatarCell from "../custom/AvatarCell.vue";
 
-const { allData, countries } = getData();
+const { allData, countries, users } = getData();
 
 const columns = [
 	{ id: "id", width: 50 },
@@ -80,6 +81,22 @@ const columns = [
 		],
 		cell: StatusCell,
 	},
+	{
+		id: "assigned",
+		header: [
+			"Assigned",
+			{
+				filter: {
+					type: "multiselect",
+					config: {
+						cell: AvatarCell,
+					},
+				},
+			},
+		],
+		options: users.map(user => ({ ...user, name: user.label })),
+		cell: AvatarCell,
+	},
 ];
 </script>
 
@@ -87,7 +104,26 @@ const columns = [
 	<div class="demo" style="padding: 20px;">
 		<h4>Grid with custom filtering in header</h4>
 		<div style="height: 400px;">
-			<Grid :data="allData" :columns="columns" />
+			<Grid
+				:data="allData"
+				:columns="columns"
+				:cell-style="
+					(_row, column) =>
+						column.id === 'assigned' ? 'vcenter' : ''
+				"
+			/>
 		</div>
 	</div>
 </template>
+
+<style scoped>
+.demo :global(.vcenter) {
+	display: flex;
+	align-items: center;
+}
+.demo :global(.wx-cell.wx-filter .wx-multiselect .wx-label) {
+	display: flex;
+	align-items: center;
+	padding: 1px 8px;
+}
+</style>

@@ -8,7 +8,7 @@ const props = defineProps({
 const stars = computed(() => {
 	const res = [];
 	const max = 5;
-	const n = Math.round((props.data.stars / 10000) * max);
+	const n = Math.round((props.data.row.stars / 10000) * max);
 	for (let i = 0; i < max; i++) {
 		if (i < n) res.push({ filled: true });
 		else res.push({});
@@ -21,12 +21,12 @@ const stars = computed(() => {
 <template>
 	<div class="data">
 		<div class="line">
-			<b>Name:</b> {{ data.firstName }} {{ data.lastName }}
+			<b>Name:</b> {{ data.row.firstName }} {{ data.row.lastName }}
 		</div>
-		<div class="line"><b>City:</b> {{ data.city || "Unknown" }}</div>
-		<div class="line"><b>Email:</b> {{ data.email }}</div>
+		<div class="line"><b>City:</b> {{ data.row.city || "Unknown" }}</div>
+		<div class="line"><b>Email:</b> {{ data.row.email }}</div>
 		<div class="line">
-			<b>Address:</b> {{ data.street }}, {{ data.zipCode }}
+			<b>Address:</b> {{ data.row.street }}, {{ data.row.zipCode }}
 		</div>
 		<div class="line stars">
 			<i
@@ -35,9 +35,9 @@ const stars = computed(() => {
 				class="wxi-cat"
 				:class="{ filled: star.filled }"
 			></i>
-			({{ data.stars }})
+			({{ data.row.stars }})
 		</div>
-		<div class="line"><b>Followers:</b> {{ data.followers }}</div>
+		<div class="line"><b>Followers:</b> {{ data.row.followers }}</div>
 	</div>
 </template>
 
