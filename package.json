@@ -1,6 +1,6 @@
 {
   "name": "@svar-ui/vue-grid",
-  "version": "2.7.1",
+  "version": "2.7.2",
   "description": "SVAR Vue Grid library",
   "productTag": "grid",
   "type": "module",
@@ -35,8 +35,8 @@
     "dist-full/index.css"
   ],
   "dependencies": {
-    "@svar-ui/grid-locales": "2.7.0",
-    "@svar-ui/grid-store": "2.7.0",
+    "@svar-ui/grid-locales": "2.7.1",
+    "@svar-ui/grid-store": "2.7.1",
     "@svar-ui/lib-dom": "0.13.1",
     "@svar-ui/lib-state": "1.9.7",
     "@svar-ui/lib-vue": "1.1.0",
