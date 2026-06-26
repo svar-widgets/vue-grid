@@ -3,8 +3,8 @@ import BasicInit from "./cases/BasicInit.vue";
 import CollapsibleColumns from "./cases/CollapsibleColumns.vue";
 import ColumnsToContent from "./cases/ColumnsToContent.vue";
 import ContextMenu from "./cases/ContextMenu.vue";
-import CustomCells from "./cases/CustomCells.vue";
 import CustomContextMenu from "./cases/CustomContextMenu.vue";
+import CustomCells from "./cases/CustomCells.vue";
 import CustomEmbedingActions from "./cases/CustomEmbedingActions.vue";
 import DynamicData from "./cases/DynamicData.vue";
 import EventHandling from "./cases/EventHandling.vue";
@@ -15,7 +15,6 @@ import FillspaceColumns from "./cases/FillspaceColumns.vue";
 import FilterBar from "./cases/FilterBar.vue";
 import FilterBuilder from "./cases/FilterBuilder.vue";
 import FilterQuery from "./cases/FilterQuery.vue";
-import FilterSimpleFilterBuilder from "./cases/FilterSimpleFilterBuilder.vue";
 import Filters from "./cases/Filters.vue";
 import FiltersCustom from "./cases/FiltersCustom.vue";
 import FiltersCustomHandler from "./cases/FiltersCustomHandler.vue";
@@ -43,7 +42,6 @@ import Sort from "./cases/Sort.vue";
 import SortCustom from "./cases/SortCustom.vue";
 import StaticData from "./cases/StaticData.vue";
 import Styling from "./cases/Styling.vue";
-import TableAPI from "./cases/TableAPI.vue";
 import TableHeaderFooterSpans from "./cases/TableHeaderFooterSpans.vue";
 import TableHeaderFooterVertical from "./cases/TableHeaderFooterVertical.vue";
 import Tooltips from "./cases/Tooltips.vue";
@@ -55,24 +53,20 @@ import PrintWideGrid from "./cases/PrintWideGrid.vue";
 import UndoRedo from "./cases/UndoRedo.vue";
 import Toolbar from "./cases/Toolbar.vue";
 import ToolbarCustom from "./cases/ToolbarCustom.vue";
-import ExternalToolbar from "./cases/ExternalToolbar.vue";
 import CustomRowHeight from "./cases/CustomRowHeight.vue";
 import ExportCSV from "./cases/ExportCSV.vue";
 
 
 export const links = [
 	["/base/:skin", "Basic DataGrid", BasicInit, "BasicInit"],
+	["/bigdata/:skin", "Render big data", StaticData, "StaticData"],
+
+	{ group: "Columns" },
 	[
 		"/auto-config/:skin",
 		"Automatically generated columns",
 		AutoConfigColumns,
 		"AutoConfigColumns",
-	],
-	[
-		"/spans/:skin",
-		"Header and footer spans",
-		TableHeaderFooterSpans,
-		"TableHeaderFooterSpans",
 	],
 	[
 		"/fillspace/:skin",
@@ -86,7 +80,14 @@ export const links = [
 		ColumnsToContent,
 		"ColumnsToContent",
 	],
+	["/fixed/:skin", "Pinned columns", FixedColumns, "FixedColumns"],
 	["/resize/:skin", "Resize columns", Resize, "Resize"],
+	[
+		"/visibility/:skin",
+		"Hide/show columns",
+		VisibilityColumns,
+		"VisibilityColumns",
+	],
 	[
 		"/collapsible-columns/:skin",
 		"Collapse columns",
@@ -94,12 +95,11 @@ export const links = [
 		"CollapsibleColumns",
 	],
 	[
-		"/visibility/:skin",
-		"Hide/show columns",
-		VisibilityColumns,
-		"VisibilityColumns",
+		"/spans/:skin",
+		"Spans in header and footer",
+		TableHeaderFooterSpans,
+		"TableHeaderFooterSpans",
 	],
-	["/fixed/:skin", "Fixed columns", FixedColumns, "FixedColumns"],
 	[
 		"/header-vertical/:skin",
 		"Vertical text in header",
@@ -107,37 +107,7 @@ export const links = [
 		"TableHeaderFooterVertical",
 	],
 
-	[
-		"/size-container/:skin",
-		"Size to container",
-		SizeToContainer,
-		"SizeToContainer",
-	],
-	["/size-content/:skin", "Size to content", SizeToContent, "SizeToContent"],
-	[
-		"/responsive-mode/:skin",
-		"Responsive mode",
-		ResponsiveMode,
-		"ResponsiveMode",
-	],
-
-	["/styling/:skin", "Styling", Styling, "Styling"],
-
-	["/multiline-row/:skin", "Multi-line rows", MultilineRows, "MultilineRows"],
-	["/selection/:skin", "Row selection", RowSelection, "RowSelection"],
-	[
-		"/multi-selection/:skin",
-		"Multiple row selection",
-		RowMultiSelection,
-		"RowMultiSelection",
-	],
-	[
-		"/check-selection/:skin",
-		"Selection with checkboxes",
-		SelectionCheckboxes,
-		"SelectionCheckboxes",
-	],
-
+	{ group: "Cells" },
 	["/custom/:skin", "Custom cells", CustomCells, "CustomCells"],
 	[
 		"/embedding-actions/:skin",
@@ -145,8 +115,7 @@ export const links = [
 		CustomEmbedingActions,
 		"CustomEmbedingActions",
 	],
-	["/tooltips/:skin", "Tooltips for data cells", Tooltips, "Tooltips"],
-
+	["/tooltips/:skin", "Tooltips", Tooltips, "Tooltips"],
 	["/editors/:skin", "Cell editors", InlineEditors, "InlineEditors"],
 	[
 		"/editors-custom/:skin",
@@ -162,32 +131,41 @@ export const links = [
 	],
 	[
 		"/editors-disabled/:skin",
-		"Disabled cell inline editors",
+		"Disabled cell editors",
 		InlineEditorsDisabled,
 		"InlineEditorsDisabled",
 	],
-	["/editpanel/:skin", "Editor", ExternalEditor, "ExternalEditor"],
-	[
-		"/editpanel-comments/:skin",
-		"Editor with Comments",
-		ExternalEditorComments,
-		"ExternalEditorComments",
-	],
-	[
-		"/editpanel-tasklist/:skin",
-		"Editor with Tasklist",
-		ExternalEditorTasklist,
-		"ExternalEditorTasklist",
-	],
 
-	["/reordering/:skin", "Reordering rows", Reordering, "Reordering"],
-	["/sort/:skin", "Sort data", Sort, "Sort"],
+	{ group: "Rows" },
+	["/selection/:skin", "Row selection", RowSelection, "RowSelection"],
 	[
-		"/sort-custom/:skin",
-		"Custom data sorting",
-		SortCustom,
-		"Custom data sorting",
+		"/multi-selection/:skin",
+		"Multiple row selection",
+		RowMultiSelection,
+		"RowMultiSelection",
 	],
+	[
+		"/check-selection/:skin",
+		"Selection with checkboxes",
+		SelectionCheckboxes,
+		"SelectionCheckboxes",
+	],
+	[
+		"/custom-row-height/:skin",
+		"Custom row heights",
+		CustomRowHeight,
+		"CustomRowHeight",
+	],
+	[
+		"/multiline-row/:skin",
+		"Auto row heights",
+		MultilineRows,
+		"MultilineRows",
+	],
+	["/reordering/:skin", "Reordering rows", Reordering, "Reordering"],
+	["/treetable/:skin", "Tree rows", TreeTable, "TreeTable"],
+
+	{ group: "Data operations" },
 	["/filters/:skin", "Filters", Filters, "Filters"],
 	[
 		"/filters-custom/:skin",
@@ -207,59 +185,84 @@ export const links = [
 		ExternalFilters,
 		"ExternalFilters",
 	],
-	["/filterbar/:skin", "Filter data with FilterBar", FilterBar, "FilterBar"],
+	["/filterbar/:skin", "Integration with FilterBar", FilterBar, "FilterBar"],
 	[
 		"/filterbuilder/:skin",
-		"Filter data with FilterBuilder",
+		"Integration with FilterBuilder",
 		FilterBuilder,
 		"FilterBuilder",
 	],
 	[
 		"/filterquery/:skin",
-		"Filter data with FilterQuery",
+		"Integration with FilterQuery",
 		FilterQuery,
 		"FilterQuery",
 	],
+	["/sort/:skin", "Sort data", Sort, "Sort"],
 	[
-		"/filtered-data/:skin",
-		"Filter data before parsing",
-		FilterSimpleFilterBuilder,
-		"FilterSimpleFilterBuilder",
+		"/sort-custom/:skin",
+		"Sort data with custom functions",
+		SortCustom,
+		"Custom data sorting",
 	],
 	["/pagination/:skin", "Pagination", Paging, "Paging"],
+	["/undo-redo/:skin", "Undo/redo", UndoRedo, "UndoRedo"],
+	["/events/:skin", "Action handlers", EventHandling, "EventHandling"],
 
-	["/context/:skin", "Context menu", ContextMenu, "ContextMenu"],
+	{ group: "UI / Interactions" },
+	["/toolbar/:skin", "Toolbar: built-in", Toolbar],
+	["/toolbar-custom/:skin", "Toolbar: custom", ToolbarCustom],
+	["/context/:skin", "Context menu: built-in", ContextMenu, "ContextMenu"],
 	[
 		"/custom-context/:skin",
-		"Custom context menu",
+		"Context menu: custom",
 		CustomContextMenu,
 		"CustomContextMenu",
 	],
+	["/editpanel/:skin", "Editor", ExternalEditor, "ExternalEditor"],
+	[
+		"/editpanel-comments/:skin",
+		"Editor with Comments",
+		ExternalEditorComments,
+		"ExternalEditorComments",
+	],
+	[
+		"/editpanel-tasklist/:skin",
+		"Editor with Tasklist",
+		ExternalEditorTasklist,
+		"ExternalEditorTasklist",
+	],
+	["/hotkeys-custom/:skin", "Custom hotkeys", HotkeysCustom, "HotkeysCustom"],
+	["/scroll/:skin", "Scrolling", ScrollTable, "ScrollTable"],
 
-	["/overlay/:skin", "Overlay", Overlay, "Overlay"],
-	["/hotkeys-custom/:skin", "Custom Hotkeys", HotkeysCustom, "HotkeysCustom"],
-	["/bigdata/:skin", "Render big data", StaticData, "StaticData"],
+	{ group: "Load & Save" },
 	["/dynamic/:skin", "Dynamic loading", DynamicData, "DynamicData"],
 	["/rest/:skin", "REST backend", RestBackend, "RestBackend"],
-
-	["/treetable/:skin", "Tree structure", TreeTable, "TreeTable"],
-
-
-	["/api/:skin", "API calls", TableAPI, "TableAPI"],
-	["/events/:skin", "Event handling", EventHandling, "EventHandling"],
-	["/scroll/:skin", "Scroll by API", ScrollTable, "ScrollTable"],
-	["/print/:skin", "Print", Print, "Print"],
-	["/print-wide/:skin", "Print wide grid", PrintWideGrid, "PrintWideGrid"],
 	["/export-csv/:skin", "Export to CSV", ExportCSV, "ExportCSV"],
-	["/locale/:skin", "Locales", Localization, "Localization"],
-	["/undo-redo/:skin", "Undo/redo", UndoRedo, "UndoRedo"],
-	["/toolbar/:skin", "Toolbar", Toolbar],
-	["/toolbar-custom/:skin", "Toolbar: custom", ToolbarCustom],
-	["/external-toolbar/:skin", "External Toolbar", ExternalToolbar],
+	["/print/:skin", "Print", Print, "Print"],
 	[
-		"/custom-row-height/:skin",
-		"Custom row heights",
-		CustomRowHeight,
-		"CustomRowHeight",
+		"/print-wide/:skin",
+		"Print: wide DataGrid",
+		PrintWideGrid,
+		"PrintWideGrid",
 	],
+
+
+	{ group: "Appearance" },
+	["/styling/:skin", "Styling", Styling, "Styling"],
+	[
+		"/size-container/:skin",
+		"Size to container",
+		SizeToContainer,
+		"SizeToContainer",
+	],
+	["/size-content/:skin", "Size to content", SizeToContent, "SizeToContent"],
+	[
+		"/responsive-mode/:skin",
+		"Responsive mode",
+		ResponsiveMode,
+		"ResponsiveMode",
+	],
+	["/overlay/:skin", "Overlay", Overlay, "Overlay"],
+	["/locale/:skin", "Locales", Localization, "Localization"],
 ];

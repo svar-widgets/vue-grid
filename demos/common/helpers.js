@@ -3,11 +3,13 @@ import { links as raw } from "../routes";
 
 // Create route configuration for Vue Router
 function getRoutes(skinSettings) {
-	const routes = raw.map((a) => ({
-		path: a[0],
-		component: a[2],
-		props: { ...skinSettings }
-	}));
+	const routes = raw
+		.filter((a) => Array.isArray(a))
+		.map((a) => ({
+			path: a[0],
+			component: a[2],
+			props: { ...skinSettings }
+		}));
 
 	// Add redirect from root to default route
 	routes.unshift({

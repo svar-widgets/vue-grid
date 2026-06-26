@@ -9,8 +9,9 @@ import { setID } from "@svar-ui/lib-dom";
 const vResize = asDirective(resize);
 
 const api = inject("grid-store");
-const { sortMarks } = api.getReactiveState();
+const { sortMarks, scrollLeft } = api.getReactiveState();
 const sortMarksRef = subscribe(sortMarks);
+const scrollLeftRef = subscribe(scrollLeft);
 
 const props = defineProps({
 	cell: {},
@@ -21,6 +22,10 @@ const props = defineProps({
 	columnStyle: { type: Function },
 	bodyHeight: {},
 	hasSplit: {},
+	deltaLeft: {},
+	leftColumnsWidth: {},
+	rightColumnsWidth: {},
+	viewportWidth: {},
 });
 
 let start;
@@ -73,23 +78,65 @@ function toggleSortColumn(ev) {
 	if (ev.key === "Enter" && !props.cell.filter) sort(ev);
 }
 
-const isCollapsed = computed(() => props.cell.collapsed && props.column.collapsed);
-const overlay = computed(
-	() => isCollapsed.value && !props.hasSplit && props.cell.collapsible !== "header"
-);
-const collapsedTextStyle = computed(() =>
-	overlay.value ? `top:-${props.bodyHeight / 2}px;position:absolute;` : ""
+const isCollapsed = computed(() => props.cell.collapsed && props.column?.collapsed);
+const isCenterColumn = computed(
+	() => props.hasSplit && (props.column?.fixed === 0 || !props.column?.fixed)
 );
 
-const style = computed(() =>
-	getStyle(
-		props.cell.width,
-		props.cell.flexgrow,
-		props.column.fixed,
-		props.column.left,
-		props.cell.right ?? props.column.right,
-		props.cell.height + (isCollapsed.value && overlay.value ? props.bodyHeight : 0)
-	)
+const centerBounds = computed(() => {
+	if (!props.hasSplit || !isCenterColumn.value)
+		return { visible: false, clip: "" };
+
+	const width = props.cell.width || props.column.width;
+	const x = props.deltaLeft + props.cell.left - scrollLeftRef.value;
+	const centerRight = props.viewportWidth - props.rightColumnsWidth;
+
+	if (x + width <= props.leftColumnsWidth || x >= centerRight) {
+		return { visible: false, clip: "" };
+	}
+
+	const hiddenLeft = Math.max(0, props.leftColumnsWidth - x);
+	const hiddenRight = Math.max(0, x + width - centerRight);
+
+	return {
+		visible: true,
+		clip:
+			hiddenLeft || hiddenRight
+				? `clip-path:inset(0px ${hiddenRight}px 0px ${hiddenLeft}px);`
+				: "",
+	};
+});
+
+// 1) no split: all collapsed columns render with content
+// 2) split + fixed: fixed columns render with content
+// 3) split + center: only when visible in center area (clip if partially hidden)
+const showCollapsedContent = computed(
+	() => !props.hasSplit || !isCenterColumn.value || centerBounds.value.visible
+);
+
+const collapsedClip = computed(() =>
+	props.hasSplit && isCenterColumn.value && centerBounds.value.visible
+		? centerBounds.value.clip
+		: ""
+);
+
+const collapsedTextStyle = computed(() =>
+	showCollapsedContent.value
+		? `top:-${props.bodyHeight / 2}px;position:absolute;`
+		: ""
+);
+
+const style = computed(
+	() =>
+		getStyle(
+			props.cell.width,
+			props.cell.flexgrow,
+			props.column.fixed,
+			props.column.left,
+			props.cell.right ?? props.column.right,
+			props.cell.height +
+				(isCollapsed.value && showCollapsedContent.value ? props.bodyHeight : 0)
+		) + collapsedClip.value
 );
 
 const css = computed(() => getCssName(props.column, props.cell, props.columnStyle));
@@ -102,22 +149,31 @@ function getCell() {
 </script>
 
 <template>
-	<div
-		v-if="isCollapsed"
-		:class="['wx-cell', css, cell.css || '', 'wx-collapsed']"
-		:style="style"
-		role="button"
-		:aria-label="`Expand column ${cell.text || ''}`"
-		:aria-expanded="!cell.collapsed"
-		tabindex="0"
-		@keydown="toggleCollapseColumn"
-		@click="collapse"
-		:data-header-id="setID(column.id)"
-	>
-		<div class="wx-text" :style="collapsedTextStyle">
-			{{ cell.text || "" }}
+	<template v-if="isCollapsed">
+		<div
+			v-if="showCollapsedContent"
+			:class="['wx-cell', css, cell.css || '', 'wx-collapsed']"
+			:style="style"
+			role="button"
+			:aria-label="`Expand column ${cell.text || ''}`"
+			:aria-expanded="!cell.collapsed"
+			tabindex="0"
+			@keydown="toggleCollapseColumn"
+			@click="collapse"
+			:data-header-id="setID(column.id)"
+		>
+			<div class="wx-text" :style="collapsedTextStyle">
+				{{ cell.text || "" }}
+			</div>
 		</div>
-	</div>
+		<div
+			v-else
+			:class="['wx-cell', css, cell.css || '', 'wx-collapsed']"
+			:style="style"
+			aria-hidden="true"
+			:data-header-id="setID(column.id)"
+		></div>
+	</template>
 	<div
 		v-else
 		:class="['wx-cell', css, cell.css || '', { 'wx-filter': cell.filter, 'wx-fixed-right': column.fixed && column.fixed.right }]"
@@ -280,7 +336,7 @@ function getCell() {
 	background-color: transparent;
 	opacity: 0;
 	cursor: ew-resize;
-	z-index: 8;
+	z-index: 5;
 }
 .wx-grip div {
 	margin-left: 5px;
@@ -322,7 +378,7 @@ function getCell() {
 	left: 9px;
 }
 
-.wx-cell:has(.wx-grip:hover) {
+.wx-cell:has(.wx-grip:hover:not(:active)) {
 	z-index: 9;
 }
 

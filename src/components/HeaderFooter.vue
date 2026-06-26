@@ -1,7 +1,7 @@
 <script setup>
-defineOptions({ name: "GridHeaderFooter" });
+defineOptions({ name: "GridHeaderFooter", inheritAttrs: false });
 
-import { computed, inject } from "vue";
+import { computed, inject, useAttrs } from "vue";
 import { subscribe } from "@svar-ui/lib-vue";
 import HeaderCell from "./HeaderCell.vue";
 import FooterCell from "./FooterCell.vue";
@@ -16,6 +16,8 @@ const props = defineProps({
 	bodyHeight: {},
 });
 
+const attrs = useAttrs();
+
 const api = inject("grid-store");
 const { _sizes: sizes, split } = api.getReactiveState();
 const sizesVal = subscribe(sizes);
@@ -29,12 +31,16 @@ const renderedHeader = computed(() => {
 		const rowsCount = props.columns[0][props.type].length;
 		for (let ri = 0; ri < rowsCount; ri++) {
 			let inSpan = 0;
+			let left = 0;
 			res.push([]);
 			props.columns.forEach((col, ci) => {
 				const cell = { ...col[props.type][ri] };
 				if (!inSpan) {
+					cell.left = left;
 					res[ri].push(cell);
 				}
+
+				left += col.width;
 
 				if (cell.colspan > 1) {
 					inSpan = cell.colspan - 1;
@@ -102,6 +108,8 @@ function isSort(cell, ind, column) {
 					:body-height="props.bodyHeight"
 					:sort-row="isSort(cell, i, getColumn(cell.id))"
 					:has-split="hasSplit"
+					:delta-left="props.deltaLeft"
+					v-bind="attrs"
 				/>
 				<FooterCell
 					v-else

@@ -101,13 +101,15 @@ watch(
 					</div>
 				</div>
 				<div class="box-links">
-					<Link
-						v-for="data in links"
-						:key="data[0]"
-						:data="data"
-						:skin="skin"
-						@click="() => { if (isMobileView) show = false; }"
-					/>
+					<template v-for="(data, index) in links" :key="Array.isArray(data) ? data[0] : `group-${index}`">
+						<Link
+							v-if="Array.isArray(data)"
+							:data="data"
+							:skin="skin"
+							@click="() => { if (isMobileView) show = false; }"
+						/>
+						<div v-else class="group-title">{{ data.group }}</div>
+					</template>
 				</div>
 			</div>
 		</div>
@@ -523,6 +525,21 @@ a {
 	display: flex;
 	flex-direction: column;
 	gap: 6px;
+}
+
+.group-title {
+	letter-spacing: 0.6px;
+	text-transform: uppercase;
+	color: var(--wx-color-font-alt);
+	padding: 20px 16px 2px;
+	font-size: 12px;
+	font-weight: 600;
+	border-top: var(--wx-border);
+}
+
+.box-links > .group-title:first-child {
+	margin-top: 0;
+	border-top: none;
 }
 
 .hint {

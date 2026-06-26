@@ -258,7 +258,8 @@ const renderColumns = computed(() => {
 	const df = footerPos.delta;
 	const csF = footerPos.index;
 
-	if (hasAny.value && fullWidth.value > props.clientWidth) {
+	const renderAll = hasAny.value && fullWidth.value > props.clientWidth;
+	if (renderAll) {
 		dataC =
 			headerC =
 			footerC =
@@ -285,11 +286,15 @@ const renderColumns = computed(() => {
 		];
 	}
 
-	return { data: dataC, header: headerC, footer: footerC, d, df, dh };
+	return renderAll
+		? { data: dataC, header: headerC, footer: footerC, d: 0, df: 0, dh: 0 }
+		: { data: dataC, header: headerC, footer: footerC, d, df, dh };
 });
 
 const headerHeight = computed(() => props.header ? _sizesVal.value.headerHeight : 0);
-const footerHeight = computed(() => props.footer ? _sizesVal.value.footerHeight : 0);
+const footerHeight = computed(() =>
+	props.footer && dataVal.value.length ? _sizesVal.value.footerHeight : 0
+);
 
 const hasHScroll = computed(() =>
 	props.clientWidth && props.clientHeight ? fullWidth.value >= props.clientWidth : false
@@ -324,6 +329,12 @@ const globalWidth = computed(() =>
 		: contentWidth.value < props.clientWidth
 			? fullWidth.value + (hasVScroll.value ? SCROLLSIZE.value : 0)
 			: -1
+);
+
+const bodyContentHeight = computed(() =>
+	footerHeight.value
+		? Math.min(bodyClientHeight.value + 1, visibleRowsHeight.value - +props.footer)
+		: visibleRowsHeight.value
 );
 
 // how many rows visible
@@ -681,7 +692,14 @@ function getScrollSize() {
 	return width;
 }
 
-const style = computed(() => globalWidth.value > 0 ? `width:${globalWidth.value}px;` : "");
+// with at least one flexible column, size the box to 100% to match the container
+const style = computed(() =>
+	hasAny.value && fullWidth.value <= props.clientWidth
+		? "width:100%;"
+		: globalWidth.value > 0
+			? `width:${globalWidth.value}px;`
+			: ""
+);
 
 const dataEl = ref(null);
 let rowHeights = [];
@@ -704,7 +722,7 @@ function adjustHeight() {
 
 watchEffect(() => dataRows.value && props.autoRowHeight && adjustHeight());
 
-watchEffect(() => {
+watch([renderColumns, dataRows], () => {
 	if (focusCellVal.value) {
 		const rowExists = dataRows.value.some(
 			row => row.id === focusCellVal.value.row
@@ -751,6 +769,11 @@ watchEffect(() => {
 		}
 	} else focus.value = null;
 });
+
+const viewportWidth = computed(() =>
+	(globalWidth.value > 0 ? globalWidth.value : props.clientWidth) -
+		(hasVScroll.value ? SCROLLSIZE.value : 0)
+);
 
 const scrollToConfig = computed(() => ({
 	scroll,
@@ -832,10 +855,13 @@ function isSelected(row) {
 				<div v-if="header" class="wx-header-wrapper">
 					<HeaderFooter
 						:content-width="contentWidth"
+						:viewport-width="viewportWidth"
 						:delta-left="renderColumns.dh"
 						:columns="renderColumns.header"
 						:column-style="columnStyle"
-						:body-height="visibleRowsHeight - +footer"
+						:body-height="bodyContentHeight"
+						:left-columns-width="leftColumns.width"
+						:right-columns-width="rightColumns.width"
 					/>
 				</div>
 				<div
