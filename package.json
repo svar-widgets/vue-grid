@@ -1,6 +1,6 @@
 {
   "name": "@svar-ui/vue-grid",
-  "version": "2.7.2",
+  "version": "2.7.3",
   "description": "SVAR Vue Grid library",
   "productTag": "grid",
   "type": "module",
@@ -35,8 +35,8 @@
     "dist-full/index.css"
   ],
   "dependencies": {
-    "@svar-ui/grid-locales": "2.7.1",
-    "@svar-ui/grid-store": "2.7.1",
+    "@svar-ui/grid-locales": "2.7.2",
+    "@svar-ui/grid-store": "2.7.2",
     "@svar-ui/lib-dom": "0.13.1",
     "@svar-ui/lib-state": "1.9.7",
     "@svar-ui/lib-vue": "1.1.0",
@@ -51,7 +51,7 @@
   "devDependencies": {
     "@vitejs/plugin-vue": "^6.0.1",
     "@svar-ui/core-locales": "2.6.0",
-    "@svar-ui/grid-data-provider": "2.7.0",
+    "@svar-ui/grid-data-provider": "2.7.2",
     "@svar-ui/vue-comments": "2.6.0",
     "@svar-ui/vue-editor": "2.6.0",
     "@svar-ui/vue-filter": "2.5.0",

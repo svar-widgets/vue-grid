@@ -31,6 +31,7 @@ const props = defineProps({
 	dynamic: { default: null },
 	overlay: { default: null },
 	reorder: { type: Boolean, default: false },
+	draggableRows: { type: [Boolean, Function], default: false },
 	onreorder: { type: Function, default: null },
 	autoRowHeight: { type: Boolean, default: false },
 	sizes: { default: () => ({}) },
@@ -200,6 +201,7 @@ defineExpose({
 			:column-style="columnStyle"
 			:cell-style="cellStyle"
 			:onreorder="onreorder"
+			:draggable-rows="draggableRows"
 			:multiselect="multiselect"
 			:auto-row-height="autoRowHeight"
 			:client-width="clientWidth"

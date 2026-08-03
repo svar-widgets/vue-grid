@@ -2,11 +2,7 @@
 defineOptions({ name: "GridInlineEditorsDatepicker" });
 
 import { ref, shallowRef, computed, onMounted } from "vue";
-import { clickOutside } from "@svar-ui/lib-dom";
-import { asDirective } from "@svar-ui/lib-vue";
 import { Calendar, Dropdown } from "@svar-ui/vue-core";
-
-const vClickOutside = asDirective(clickOutside);
 
 const props = defineProps({
 	editor: {},
@@ -57,14 +53,12 @@ onMounted(() => {
 		</template>
 		<span v-else class="wx-text">{{ editor.renderedValue }}</span>
 	</div>
-	<Dropdown v-bind="dropdownOptions" :oncancel="props.oncancel">
-		<div v-click-outside="() => props.onsave(true)">
-			<Calendar
-				:value="value"
-				:onchange="updateValue"
-				:buttons="editor.config?.buttons"
-			/>
-		</div>
+	<Dropdown v-bind="dropdownOptions" :oncancel="() => props.oncancel(true)">
+		<Calendar
+			:value="value"
+			:onchange="updateValue"
+			:buttons="editor.config?.buttons"
+		/>
 	</Dropdown>
 </template>
 

@@ -3,10 +3,6 @@ defineOptions({ name: "GridInlineEditorsCombo" });
 
 import { ref, computed, onMounted } from "vue";
 import { SuggestDropdown } from "@svar-ui/vue-core";
-import { clickOutside } from "@svar-ui/lib-dom";
-import { asDirective } from "@svar-ui/lib-vue";
-
-const vClickOutside = asDirective(clickOutside);
 
 const props = defineProps({
 	editor: {},
@@ -67,14 +63,13 @@ onMounted(() => {
 		v-model="text"
 		@input="input"
 		@keydown="e => keydown(e, index)"
-		v-click-outside="() => onsave(true)"
 	/>
 	<SuggestDropdown
 		:items="filterOptions"
 		:onready="ready"
 		:onselect="updateValue"
 		v-bind="dropdownOptions"
-		:oncancel="props.oncancel"
+		:oncancel="() => props.oncancel(true)"
 	>
 		<template #default="{ option }">
 			<template v-if="template">{{ template(option) }}</template>

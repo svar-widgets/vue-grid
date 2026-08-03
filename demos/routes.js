@@ -6,6 +6,8 @@ import ContextMenu from "./cases/ContextMenu.vue";
 import CustomContextMenu from "./cases/CustomContextMenu.vue";
 import CustomCells from "./cases/CustomCells.vue";
 import CustomEmbedingActions from "./cases/CustomEmbedingActions.vue";
+import DragFromGrid from "./cases/DragFromGrid.vue";
+import DragToGrid from "./cases/DragToGrid.vue";
 import DynamicData from "./cases/DynamicData.vue";
 import EventHandling from "./cases/EventHandling.vue";
 import ExternalEditor from "./cases/ExternalEditor.vue";
@@ -163,6 +165,18 @@ export const links = [
 		"MultilineRows",
 	],
 	["/reordering/:skin", "Reordering rows", Reordering, "Reordering"],
+	[
+		"/drag-to-grid/:skin",
+		"Creating rows from drag-n-drop",
+		DragToGrid,
+		"DragToGrid",
+	],
+	[
+		"/drag-from-grid/:skin",
+		"Dragging rows outside DataGrid",
+		DragFromGrid,
+		"DragFromGrid",
+	],
 	["/treetable/:skin", "Tree rows", TreeTable, "TreeTable"],
 
 	{ group: "Data operations" },

@@ -41,6 +41,7 @@ const props = defineProps({
 	overlay: {},
 	multiselect: {},
 	onreorder: { type: Function },
+	draggableRows: { type: [Boolean, Function], default: false },
 	rowStyle: { type: Function },
 	columnStyle: { type: Function },
 	cellStyle: { type: Function },
@@ -117,30 +118,19 @@ const hasAny = computed(() => {
 const defaultRowHeight = computed(() => _sizesVal.value.rowHeight);
 const tableNode = ref(null);
 
+// draggableRows: boolean for all rows, or a (row) => boolean predicate
+const isRowDraggable = row =>
+	typeof props.draggableRows === "function"
+		? props.draggableRows(row)
+		: props.draggableRows;
+
 // reorder
 const dragItem = ref(null);
 const dragNode = ref(null);
 
-const fullHeight = computed(() => {
-	const count = dynamicVal.value ? dynamicVal.value.rowCount : dataVal.value.length;
-
-	if (props.autoRowHeight) {
-		return (
-			renderedHeight.value +
-			renderRows.value.d +
-			(count - renderEnd.value) * defaultRowHeight.value
-		);
-	}
-	if (!_rowHeightFromDataVal.value) {
-		return count * defaultRowHeight.value;
-	}
-
-	let totalHeight = 0;
-	for (let i = 0; i < count; i++)
-		totalHeight += dataVal.value[i].rowHeight || defaultRowHeight.value;
-
-	return totalHeight;
-});
+let rowHeights = [];
+const renderedHeight = ref(0);
+const renderEnd = ref(0);
 
 const fullWidth = computed(() =>
 	_columnsVal.value.reduce((acc, col) => {
@@ -299,6 +289,19 @@ const footerHeight = computed(() =>
 const hasHScroll = computed(() =>
 	props.clientWidth && props.clientHeight ? fullWidth.value >= props.clientWidth : false
 );
+
+// how many rows visible
+const visibleRowsHeight = computed(() =>
+	props.clientHeight -
+		headerHeight.value -
+		footerHeight.value -
+		(hasHScroll.value ? SCROLLSIZE.value : 0)
+);
+
+const visibleRows = computed(() =>
+	Math.ceil(visibleRowsHeight.value / defaultRowHeight.value) + 1
+);
+
 const hasVScroll = ref(false);
 
 function setVScroll() {
@@ -335,18 +338,6 @@ const bodyContentHeight = computed(() =>
 	footerHeight.value
 		? Math.min(bodyClientHeight.value + 1, visibleRowsHeight.value - +props.footer)
 		: visibleRowsHeight.value
-);
-
-// how many rows visible
-const visibleRowsHeight = computed(() =>
-	props.clientHeight -
-		headerHeight.value -
-		footerHeight.value -
-		(hasHScroll.value ? SCROLLSIZE.value : 0)
-);
-
-const visibleRows = computed(() =>
-	Math.ceil(visibleRowsHeight.value / defaultRowHeight.value) + 1
 );
 
 // request data if necessary
@@ -443,7 +434,27 @@ const visibleSelection = computed(() =>
 );
 
 const renderStart = computed(() => renderRows.value.start);
-const renderEnd = ref();
+
+const fullHeight = computed(() => {
+	const count = dynamicVal.value ? dynamicVal.value.rowCount : dataVal.value.length;
+
+	if (props.autoRowHeight) {
+		return (
+			renderedHeight.value +
+			renderRows.value.d +
+			(count - renderEnd.value) * defaultRowHeight.value
+		);
+	}
+	if (!_rowHeightFromDataVal.value) {
+		return count * defaultRowHeight.value;
+	}
+
+	let totalHeight = 0;
+	for (let i = 0; i < count; i++)
+		totalHeight += dataVal.value[i].rowHeight || defaultRowHeight.value;
+
+	return totalHeight;
+});
 
 function onScroll(ev) {
 	const top = ev.target.scrollTop;
@@ -702,8 +713,6 @@ const style = computed(() =>
 );
 
 const dataEl = ref(null);
-let rowHeights = [];
-const renderedHeight = ref(0);
 function adjustHeight() {
 	// make sure the UI is updated before syncing the state
 	nextTick().then(() => {
@@ -891,6 +900,7 @@ function isSelected(row) {
 							]"
 							:data-id="setID(row.id)"
 							:data-context-id="setID(row.id)"
+							:draggable="isRowDraggable(row) ? 'true' : null"
 							:style="getRowStyle(row)"
 							role="row"
 							:aria-rowindex="rIndex"

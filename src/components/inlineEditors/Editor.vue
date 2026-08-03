@@ -5,6 +5,8 @@ import { computed, inject } from "vue";
 import { subscribe } from "@svar-ui/lib-vue";
 import { getStyle } from "../../helpers/columnWidth";
 import { editors } from "./editors";
+import { getValue } from "@svar-ui/grid-store";
+import { isSame } from "@svar-ui/lib-state";
 
 const props = defineProps({
 	column: {},
@@ -16,17 +18,17 @@ const { editor } = api.getReactiveState();
 const editorVal = subscribe(editor, true);
 
 function save(ignoreFocus) {
-	const cell = ignoreFocus
-		? null
-		: { row: editorVal.value.id, column: editorVal.value.column };
-	closeEditor(false, cell);
+	const cell = getCell(ignoreFocus);
+	const isSameValue = isSame(
+		getValue(props.row, props.column),
+		editorVal.value.value
+	);
+	closeEditor(isSameValue, cell);
 }
 
-function cancel() {
-	closeEditor(true, {
-		row: editorVal.value.id,
-		column: editorVal.value.column,
-	});
+function cancel(ignoreFocus) {
+	const cell = getCell(ignoreFocus);
+	closeEditor(true, cell);
 }
 
 function updateValue(value) {
@@ -41,6 +43,12 @@ function closeEditor(ignore, cell) {
 			eventSource: "click",
 		});
 	}
+}
+
+function getCell(ignoreFocus) {
+	return ignoreFocus
+		? null
+		: { row: editorVal.value.id, column: editorVal.value.column };
 }
 
 function keyHandler(ev) {

@@ -73,7 +73,6 @@ onMounted(() => {
 		:onready="ready"
 		:onselect="updateValue"
 		v-bind="dropdownOptions"
-		:oncancel="props.oncancel"
 	>
 		<template #default="{ option }">
 			<template v-if="template">
