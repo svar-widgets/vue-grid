@@ -1,3 +1,9 @@
+## 2.7.4
+
+### Fixes
+
+- Cell focus not restored after closing a popup editor 
+
 ## 2.7.3
 
 ### Updates

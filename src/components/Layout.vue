@@ -483,7 +483,10 @@ const bodyClickHandlers = {
 	click: (rowId, ev) => {
 		if (postDrag) return;
 		const column = locateID(ev, "data-col-id");
-		if (focusCellVal.value?.id !== rowId)
+		if (
+			focusCellVal.value?.row !== rowId ||
+			focusCellVal.value?.column !== column
+		)
 			api.exec("focus-cell", {
 				row: rowId,
 				column,
