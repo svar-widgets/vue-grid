@@ -1,3 +1,10 @@
+## 2.7.5
+
+### Fixes
+
+- Header menu keeps showing the columns of the first grid when its `api` changes
+- Use latest lib-vue, lib-state and lib-data-provider
+
 ## 2.7.4
 
 ### Fixes
