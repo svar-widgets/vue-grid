@@ -225,7 +225,6 @@ function getCell() {
 			v-if="column.resize && lastRow && !cell._hidden"
 			class="wx-grip"
 			role="presentation"
-			aria-label="Resize column"
 			v-resize="{ down, move, up }"
 			@click.stop
 		>
