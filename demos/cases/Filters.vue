@@ -79,7 +79,6 @@ const columnsSpans = [
 				text: "Main client info",
 				colspan: 3,
 				collapsible: true,
-				open: true,
 			},
 			{ text: "First Name" },
 			{ filter: "text" },

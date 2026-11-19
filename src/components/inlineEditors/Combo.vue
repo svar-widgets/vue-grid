@@ -12,17 +12,21 @@ const props = defineProps({
 	oncancel: { type: Function },
 });
 
+const value = computed(() => props.editor.value);
 const text = ref(props.editor.renderedValue);
 const filterOptions = ref(props.editor.options);
-const template = props.editor?.config?.template;
-const cell = props.editor?.config?.cell;
-const dropdown = props.editor?.config?.dropdown ?? {};
-const value = props.editor.value;
 
-const dropdownOptions = computed(() => ({ trackScroll: true, ...dropdown }));
+const template = computed(() => props.editor?.config?.template);
+const cell = computed(() => props.editor?.config?.cell);
+const dropdown = computed(() => props.editor?.config?.dropdown ?? {});
+
+const dropdownOptions = computed(() => ({
+	trackScroll: true,
+	...dropdown.value,
+}));
 
 const index = computed(() =>
-	filterOptions.value.findIndex(a => a.id === value)
+	filterOptions.value.findIndex(a => a.id === value.value)
 );
 
 function updateValue({ id }) {

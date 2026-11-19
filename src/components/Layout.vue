@@ -10,6 +10,7 @@ import {
 	resetAutoScroll,
 	tryAutoScroll,
 } from "../helpers/actions/dragscroll";
+import { resize as resizeRowAction } from "../helpers/actions/resize";
 import {
 	clickOutside,
 	delegateClick,
@@ -34,6 +35,7 @@ const vHotkeys = asDirective(hotkeysAction);
 const vScrollTo = asDirective(scrollTo);
 const vClickOutside = asDirective(clickOutside);
 const vDelegateClick = asDirective(delegateClick);
+const vResizeRow = asDirective(resizeRowAction);
 
 const props = defineProps({
 	header: {},
@@ -51,6 +53,7 @@ const props = defineProps({
 	clientHeight: {},
 	responsiveLevel: {},
 	hotkeys: {},
+	resizeRow: {},
 });
 
 const api = inject("grid-store");
@@ -814,6 +817,38 @@ const hotkeysConfigComputed = computed(() => ({
 	exec: v => api.exec("hotkey", v),
 }));
 
+let rowResizeStart, rowResizeId;
+function startResizeRow(node) {
+	const rowId = locateID(node);
+	const row = api.getRow(rowId);
+
+	rowResizeStart = row.rowHeight ?? defaultRowHeight.value;
+	rowResizeId = row.id;
+}
+
+function moveResizeRow({ dy }) {
+	handleResizeRow(dy, true);
+}
+
+function endResizeRow({ dy }) {
+	handleResizeRow(dy, false);
+}
+
+function handleResizeRow(dy, inProgress) {
+	api.exec("resize-row", {
+		id: rowResizeId,
+		height: Math.max(1, rowResizeStart + dy),
+		inProgress,
+	});
+}
+
+const resizeRowConfig = {
+	down: startResizeRow,
+	move: moveResizeRow,
+	up: endResizeRow,
+	target: "row",
+};
+
 const scrollStyle = computed(() =>
 	`overflow-x:${hasHScroll.value ? 'scroll' : 'hidden'};overflow-y:${hasVScroll.value ? 'scroll' : 'hidden'};`
 );
@@ -935,6 +970,13 @@ function isSelected(row) {
 									:focusable="focus?.row === row.id && focus?.column === column.id"
 								/>
 							</template>
+							<div
+								v-if="resizeRow"
+								class="wx-grip"
+								role="presentation"
+								aria-label="Resize row"
+								v-resize-row="resizeRowConfig"
+							></div>
 						</div>
 					</div>
 				</div>
@@ -1002,6 +1044,7 @@ function isSelected(row) {
 	display: flex;
 	box-sizing: border-box;
 	background-color: var(--wx-background);
+	position: relative;
 }
 
 .wx-row:not(:last-child) {
@@ -1045,5 +1088,23 @@ function isSelected(row) {
 .wx-cell.wx-collapsed {
 	width: 36px;
 	border-right: var(--wx-table-cell-border);
+}
+
+.wx-grip {
+	box-sizing: border-box;
+	position: absolute;
+	bottom: 0px;
+	width: 100%;
+	height: 4px;
+	background-color: transparent;
+	opacity: 0;
+	cursor: ns-resize;
+	z-index: 2;
+}
+
+.wx-grip:hover,
+.wx-grip:active {
+	opacity: 0.7;
+	border-bottom: 1px solid var(--wx-color-primary);
 }
 </style>

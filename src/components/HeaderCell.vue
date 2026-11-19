@@ -4,7 +4,8 @@ import { subscribe, asDirective } from "@svar-ui/lib-vue";
 import { resize } from "../helpers/actions/resize";
 import { getCssName, getStyle } from "../helpers/columnWidth";
 import Filter from "./inlineFilters/Filter.vue";
-import { setID } from "@svar-ui/lib-dom";
+import { setID, locateID } from "@svar-ui/lib-dom";
+import { isColumnMenuIcon } from "@svar-ui/grid-store";
 
 const vResize = asDirective(resize);
 
@@ -28,6 +29,14 @@ const props = defineProps({
 	viewportWidth: {},
 });
 
+const columnMenuStore = inject("grid-column-menu", null);
+
+const showColumnIcon = computed(
+	() =>
+		!!columnMenuStore &&
+		isColumnMenuIcon(columnMenuStore.menuColumns, props.column.id)
+);
+
 let start;
 
 const sortMark = computed(() => sortMarksRef.value?.[props.column.id]);
@@ -36,11 +45,11 @@ function down(node) {
 	start = props.cell.flexgrow ? node.parentNode.clientWidth : props.cell.width;
 }
 
-function move(dx) {
+function move({ dx }) {
 	resizeColumn(dx, true);
 }
 
-function up(dx) {
+function up({ dx }) {
 	resizeColumn(dx, false);
 }
 
@@ -53,7 +62,9 @@ function resizeColumn(dx, inProgress) {
 }
 
 function sort(ev) {
-	if (!props.column.sort || props.cell.filter) return;
+	const columnMenuId =
+		showColumnIcon.value && locateID(ev.target, "data-column-id");
+	if (!props.column.sort || props.cell.filter || columnMenuId) return;
 	const sm = sortMark.value;
 	if (sm?.order) {
 		sm.order = sm.order === "asc" ? "desc" : "asc";
@@ -225,19 +236,25 @@ function getCell() {
 			v-if="column.resize && lastRow && !cell._hidden"
 			class="wx-grip"
 			role="presentation"
-			v-resize="{ down, move, up }"
-			@click.stop
+			v-resize="{ down, move, up, target: 'column' }"
 		>
 			<div></div>
 		</div>
 
-		<div v-if="sortRow" class="wx-sort">
+		<div v-if="sortRow && (column.sort || sortMark)" class="wx-sort">
 			<template v-if="sortMark">
 				<div v-if="typeof sortMark.index !== 'undefined'" class="wx-order">
 					{{ sortMark.index + 1 }}
 				</div>
 				<i :class="'wxi-arrow-' + (sortMark.order === 'asc' ? 'up' : 'down')"></i>
 			</template>
+		</div>
+		<div
+			v-if="lastRow && showColumnIcon"
+			class="wx-action"
+			:data-column-id="setID(column.id)"
+		>
+			<i class="wxi-dots-v"></i>
 		</div>
 	</div>
 </template>
@@ -390,6 +407,18 @@ function getCell() {
 	margin-left: auto;
 	display: flex;
 	align-items: center;
+}
+
+.wx-sort + .wx-action {
+	margin-left: 4px;
+}
+
+.wx-action {
+	height: 100%;
+	margin-left: auto;
+	display: flex;
+	align-items: center;
+	cursor: pointer;
 }
 
 .wx-order {

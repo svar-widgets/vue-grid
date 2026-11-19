@@ -37,7 +37,8 @@ export function reorder(node, config) {
 
 	function down(ev) {
 		const source = locate(ev);
-		if (!source) return;
+		const resizer = ev.target.classList.contains("wx-grip");
+		if (!source || resizer) return;
 
 		context = {
 			container,

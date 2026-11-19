@@ -113,7 +113,6 @@ const next = computed(() => {
 		</h4>
 		<Button
 			type="primary"
-			class="btn-change-width"
 			:onclick="() => (index = next)"
 		>
 			Change width to {{ widths[next] }}

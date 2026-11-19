@@ -9,7 +9,7 @@ import { en } from "@svar-ui/grid-locales";
 
 // stores
 import { EventBusRouter } from "@svar-ui/lib-state";
-import { DataStore } from "@svar-ui/grid-store";
+import { DataStore, isCommunity } from "@svar-ui/grid-store";
 
 // writable factory for Vue
 import { writable } from "@svar-ui/lib-vue";
@@ -44,7 +44,10 @@ const props = defineProps({
 	undo: { type: Boolean, default: false },
 	hotkeys: { default: null },
 	filterValues: { default: () => ({}) },
+	resizeRow: { type: Boolean, default: false },
 });
+
+const resizeRowProp = computed(() => props.resizeRow && !isCommunity());
 
 // eslint-disable-next-line vue/valid-define-emits
 const emit = defineEmits();
@@ -105,7 +108,7 @@ const finalColumns = computed(() => {
 		const autoCols = [];
 
 		for (let key in test) {
-			if (key !== "id" && key[0] !== "$") {
+			if (key !== "id" && key !== "rowHeight" && key[0] !== "$") {
 				let col = {
 					id: key,
 					header: key[0].toUpperCase() + key.slice(1),
@@ -123,6 +126,18 @@ const finalColumns = computed(() => {
 
 	return responsiveConfig.value?.columns ?? props.columns;
 });
+
+const columnMenuStore = inject("grid-column-menu", null);
+
+const columnsMenuList = computed(() =>
+	!columnMenuStore
+		? {}
+		: columnMenuStore.menuColumns === null
+			? Object.fromEntries(
+					finalColumns.value?.map((col) => [col.id, true]) ?? []
+				)
+			: columnMenuStore.menuColumns
+);
 
 const finalSizes = computed(
 	() => responsiveConfig.value?.sizes ?? props.sizes
@@ -155,6 +170,7 @@ const reinitStore = () => {
 	dataStore.init({
 		data: props.data,
 		columns: finalColumns.value,
+		menuColumns: columnsMenuList.value,
 		split: props.split,
 		sizes: finalSizes.value,
 		selectedRows: props.selectedRows,
@@ -209,6 +225,7 @@ defineExpose({
 			:responsive-level="responsiveLevel"
 			:resize="resize"
 			:hotkeys="hotkeys"
+			:resize-row="resizeRowProp"
 		/>
 	</Locale>
 </template>

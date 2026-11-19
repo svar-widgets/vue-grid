@@ -1,7 +1,7 @@
 <script setup>
 defineOptions({ name: "GridPrintPrint", inheritAttrs: false });
 
-import { inject, ref, onMounted, useAttrs } from "vue";
+import { inject, ref, computed, onMounted, useAttrs } from "vue";
 import Grid from "./Grid.vue";
 import { getPrintColumns } from "@svar-ui/grid-store";
 
@@ -14,7 +14,7 @@ const attrs = useAttrs();
 const api = inject("grid-store");
 const { _skin: skin, _columns: columns } = api.getState();
 
-const grids = getPrintColumns(columns, props.config);
+const grids = computed(() => getPrintColumns(columns, props.config));
 const node = ref(null);
 
 onMounted(() => {

@@ -1,7 +1,7 @@
 <script setup>
 defineOptions({ name: "GridInlineEditorsRichselect" });
 
-import { ref, shallowRef, computed, onMounted } from "vue";
+import { ref, computed, onMounted } from "vue";
 import { SuggestDropdown } from "@svar-ui/vue-core";
 import { clickOutside } from "@svar-ui/lib-dom";
 import { asDirective } from "@svar-ui/lib-vue";
@@ -16,14 +16,15 @@ const props = defineProps({
 	oncancel: { type: Function },
 });
 
-const data = ref(
+const data = computed(() =>
 	props.editor.options.find(opt => opt.id === props.editor.value)
 );
-const value = ref(props.editor.value);
-const options = ref(props.editor.options);
-const template = shallowRef(props.editor?.config?.template);
-const cell = shallowRef(props.editor?.config?.cell);
-const dropdown = ref(props.editor?.config?.dropdown || {});
+const value = computed(() => props.editor.value);
+const options = computed(() => props.editor.options);
+const config = computed(() => props.editor?.config || {});
+const template = computed(() => config.value.template);
+const cell = computed(() => config.value.cell);
+const dropdown = computed(() => config.value.dropdown || {});
 const dropdownOptions = computed(() => ({ trackScroll: true, ...dropdown.value }));
 
 const index = computed(() => options.value.findIndex(a => a.id === value.value));

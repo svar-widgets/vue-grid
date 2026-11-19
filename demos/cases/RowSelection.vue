@@ -14,7 +14,7 @@ const columns = [
 ];
 
 const api = ref(null);
-const s = ref(0);
+const s = ref([]);
 const updateSelected = () => (s.value = api.value.getState().selectedRows);
 </script>
 

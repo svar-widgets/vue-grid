@@ -21,7 +21,6 @@ const columns = [
 		id: "lastName",
 		header: ["Last Name", { filter: "text" }],
 		footer: "Last Name",
-		filter: { type: "text" },
 	},
 	{
 		id: "email",

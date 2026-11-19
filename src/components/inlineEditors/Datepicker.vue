@@ -1,7 +1,7 @@
 <script setup>
 defineOptions({ name: "GridInlineEditorsDatepicker" });
 
-import { ref, shallowRef, computed, onMounted } from "vue";
+import { ref, computed, onMounted } from "vue";
 import { Calendar, Dropdown } from "@svar-ui/vue-core";
 
 const props = defineProps({
@@ -12,15 +12,14 @@ const props = defineProps({
 	oncancel: { type: Function },
 });
 
-const value = ref(props.editor.value || new Date());
-const { template, cell, dropdown = {} } = props.editor?.config || {};
-const templateRef = shallowRef(template);
-const cellRef = shallowRef(cell);
-const dropdownRef = ref(dropdown);
+const value = computed(() => props.editor.value || new Date());
+const config = computed(() => props.editor?.config || {});
+const templateRef = computed(() => config.value.template);
+const cellRef = computed(() => config.value.cell);
 const dropdownOptions = computed(() => ({
 	trackScroll: true,
 	width: "auto",
-	...dropdownRef.value,
+	...(config.value.dropdown || {}),
 }));
 
 function updateValue({ value }) {

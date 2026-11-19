@@ -75,7 +75,6 @@ function isLast(cell, ind) {
 }
 
 function isSort(cell, ind, column) {
-	if (!column.sort) return false;
 	for (let i = renderedHeader.value.length - 1; i >= 0; i--) {
 		const cell = column.header[i];
 		if (!cell.filter && !cell._hidden) return ind === i;

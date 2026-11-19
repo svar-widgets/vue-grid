@@ -15,14 +15,14 @@ const props = defineProps({
 	onapply: { type: Function },
 });
 
-const config = props.editor?.config || {};
+const config = computed(() => props.editor?.config || {});
 const options = computed(() => props.editor?.options ?? []);
 const value = computed(() => props.editor?.value || []);
 const text = computed(() => props.editor?.renderedValue);
 
 const dropdownOptions = computed(() => ({
 	trackScroll: true,
-	...(config.dropdown || {}),
+	...config.value?.dropdown,
 }));
 
 function updateValue({ value }) {
@@ -40,9 +40,9 @@ function updateValue({ value }) {
 			:value="value"
 			:options="options"
 			:text="text"
-			:template="config.template"
-			:cell="config.cell"
-			:clear="config.clear"
+			:template="config?.template"
+			:cell="config?.cell"
+			:clear="config?.clear"
 			:dropdown="dropdownOptions"
 			auto-open
 			:onchange="updateValue"

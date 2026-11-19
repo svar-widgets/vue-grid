@@ -1,3 +1,12 @@
+## 2.7.7
+
+### Fixes
+
+- Sort placeholder is rendered for columns that are neither sortable nor sorted
+- Row selecting after resize
+- Error in Toolbar when the "paste-row" button is checked before the api is ready
+- The store uses its own copy of lib-dom, so its hotkeys are not shared with other SVAR widgets
+
 ## 2.7.6
 
 ### Fixes

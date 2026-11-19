@@ -1,7 +1,7 @@
 <script setup>
 defineOptions({ name: "CustomColorEditor" });
 
-import { ref, onMounted } from "vue";
+import { ref, computed, onMounted } from "vue";
 import { ColorBoard, Dropdown } from "@svar-ui/vue-core";
 import { clickOutside } from "@svar-ui/lib-dom";
 import { asDirective } from "@svar-ui/lib-vue";
@@ -16,7 +16,7 @@ const props = defineProps({
 	oncancel: { type: Function },
 });
 
-const value = ref(props.editor.value);
+const value = computed(() => props.editor.value);
 
 function updateValue({ value, input }) {
 	if (input) props.onapply(value);

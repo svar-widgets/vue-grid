@@ -10,45 +10,55 @@ import type {
 	TEditorType,
 	IColumnEditor,
 	IHeaderCell,
+	TEditorConfig,
 } from "@svar-ui/grid-store";
+import type { TID } from "@svar-ui/lib-state";
 
 export * from "@svar-ui/grid-store";
+
+// the action that custom cells and editors send up through onaction
+export interface ICellAction {
+	action?: any;
+	data?: { [key: string]: any };
+}
 
 export interface IColumnEditorConfig extends IColumnEditor {
 	config?: IColumnEditor["config"] & {
 		cell?: DefineComponent<{
 			data: any;
-			onaction: (ev: {
-				action?: any;
-				data?: { [key: string]: any };
-			}) => void;
+			onaction: (ev: ICellAction) => void;
 		}>;
 	};
 }
 
+// returns the editor for the cell, or nothing when the cell is not editable
 export type TEditorHandlerConfig = (
 	row?: IRow,
 	column?: IColumn
-) => TEditorType | IColumnEditorConfig | null;
+) => TEditorType | IColumnEditorConfig | null | undefined;
 
+// API shared with inner components and custom cells through the "grid-store" context
 export type IInnerApi = Pick<
 	IApi,
 	"exec" | "getState" | "getReactiveState" | "getRow"
 >;
 
+// the columns that reach cells always have an id
+type TCellColumn = IColumn & { id: TID };
+
 export interface ICellProps {
 	api: IInnerApi;
 	row: IRow;
-	column: IColumn;
-	onaction: (ev: { action?: any; data?: { [key: string]: any } }) => void;
+	column: TCellColumn;
+	onaction: (ev: ICellAction) => void;
 }
 
 export interface IHeaderCellProps {
 	api: IInnerApi;
 	row: number;
-	column: IColumn;
+	column: TCellColumn;
 	cell: Omit<IHeaderCell, "cell">;
-	onaction: (ev: { action?: any; data?: { [key: string]: any } }) => void;
+	onaction: (ev: ICellAction) => void;
 }
 
 export interface IHeaderCellConfig extends IHeaderCell {
@@ -71,6 +81,29 @@ export interface IColumnConfig
 	footer?: TColumnHeaderConfig;
 }
 
+// props the grid passes to inline editors, the built-in ones and registered ones
+export interface IInlineEditorProps {
+	editor: TEditorConfig;
+	onsave: (ignoreFocus?: boolean) => void;
+	// any truthy value, the click event included, keeps the focus off the cell
+	oncancel: (ignoreFocus?: boolean | Event) => void;
+	onapply: (value: any) => void;
+	onaction: (ev: ICellAction) => void;
+}
+
+/* get component events from store actions */
+type RemoveHyphen<S extends string> = S extends `${infer Head}-${infer Tail}`
+	? `${Head}${RemoveHyphen<Tail>}`
+	: S;
+
+type EventName<K extends string> = `on${RemoveHyphen<K>}`;
+
+export type GridActions<T extends Record<string, any> = TMethodsConfig> = {
+	[K in keyof T as EventName<K & string>]?: (ev: T[K]) => void;
+} & {
+	[key: `on${string}`]: ((ev?: any) => void) | undefined;
+};
+
 export declare const Grid: DefineComponent<{
 	rowStyle?: (row: any) => string;
 	columnStyle?: (column: IColumn) => string;
@@ -91,6 +124,7 @@ export declare const Grid: DefineComponent<{
 	init?: (api: IApi) => void;
 	overlay?: string | DefineComponent;
 	columns: IColumnConfig[];
+	resizeRow?: boolean;
 	hotkeys?:
 		| false
 		| { [key: string]: ((e?: KeyboardEvent) => void) | boolean };
@@ -104,16 +138,22 @@ export declare const Grid: DefineComponent<{
 	undo?: boolean;
 	select?: boolean;
 	filterValues?: { [key: string]: any };
-}>;
+} & GridActions>;
 
 export declare function registerInlineEditor(
 	type: string,
-	component: DefineComponent
+	component: DefineComponent<IInlineEditorProps>
 ): void;
 
 export declare const HeaderMenu: DefineComponent<{
 	columns?: { [key: string]: boolean };
 	api?: IApi;
+}>;
+
+export declare const ColumnMenu: DefineComponent<{
+	api?: IApi;
+	columns?: { [key: string]: boolean } | null;
+	[key: string]: any;
 }>;
 
 export declare const ContextMenu: DefineComponent<{

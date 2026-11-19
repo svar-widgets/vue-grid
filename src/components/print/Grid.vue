@@ -1,7 +1,7 @@
 <script setup>
 defineOptions({ name: "GridPrintGrid" });
 
-import { inject } from "vue";
+import { inject, computed } from "vue";
 import {
 	getRenderValue,
 	getHeaderFooterPrintColumns,
@@ -22,20 +22,24 @@ const props = defineProps({
 const api = inject("grid-store");
 const { flatData: data, _sizes: sizes } = api.getState();
 
-const headerColumns =
-	props.header &&
-	getHeaderFooterPrintColumns(
-		props.columns,
-		"header",
-		sizes.headerRowHeights
-	);
-const footerColumns =
-	props.footer &&
-	getHeaderFooterPrintColumns(
-		props.columns,
-		"footer",
-		sizes.footerRowHeights
-	);
+const headerColumns = computed(
+	() =>
+		props.header &&
+		getHeaderFooterPrintColumns(
+			props.columns,
+			"header",
+			sizes.headerRowHeights
+		)
+);
+const footerColumns = computed(
+	() =>
+		props.footer &&
+		getHeaderFooterPrintColumns(
+			props.columns,
+			"footer",
+			sizes.footerRowHeights
+		)
+);
 
 function buildCellCss(row, column) {
 	let css = "";
